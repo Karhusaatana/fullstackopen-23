@@ -1,6 +1,5 @@
-import axios from 'axios'
 import { useState, useEffect } from 'react'
-
+import personService from './services/persons'
 
 const Persons = (props) =>{
   return(
@@ -41,13 +40,13 @@ const App = () => {
   const [showAll, setShowAll] = useState(true)
 
   useEffect(() =>{
-    const eventHandler = response =>{
-      setPersons(response.data)
-    }
-
-    const promise = axios.get('http://localhost:3001/persons')
-    promise.then(eventHandler)
+    personService
+      .getAll()
+      .then(response =>{
+        setPersons(response.data)
+      })
   }, [])
+
   const addPerson = (event) =>{
     event.preventDefault()
     const list = persons.map((person) => person.name)
@@ -60,13 +59,12 @@ const App = () => {
         number: newNumber,
         id: persons.length+1
       }
-      axios
-      .post('http://localhost:3001/persons', personObject)
-      .then(response =>{
-        setPersons(persons.concat(personObject))
-        setNewName('')
-        setNumber('')
-      })
+      personService
+        .create(personObject)
+        .then(response =>{
+          setPersons(persons.concat(response.data))
+          setNewName('')
+        })
     }
   }
   
