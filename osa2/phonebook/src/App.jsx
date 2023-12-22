@@ -3,11 +3,11 @@ import personService from './services/persons'
 
 const Persons = (props) =>{
   return(
-      <ul>
+      <div>
         {props.persons.map(person => 
-          <li key={person.id}>{person.name} {person.number} <button type="button" onClick={() => props.deleteClick(person.id, person.name)}>delete</button></li>
+          <div key={person.id}>{person.name} {person.number} <button type="button" onClick={() => props.deleteClick(person.id, person.name)}>delete</button></div>
         )}
-      </ul>
+      </div>
   )
 }
 const Filter = (props) =>{
@@ -52,18 +52,34 @@ const App = () => {
     const list = persons.map((person) => person.name)
     if(list.includes(newName))
     {
-      alert(`${newName} is already added to phonebook`)
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)){
+        const person = persons.find((person => person.name === newName))
+        const changedPerson = {...person, number: newNumber}
+
+        personService
+          .update(changedPerson.id, changedPerson)
+          .then(response =>{
+            setPersons(persons.map(p => p.id !== changedPerson.id ? p : response.data))
+            setNewName('')
+            setNumber('')
+          })
+          .catch(error =>{
+            alert(
+              `the number of '${newName}' can't be replaced`
+            )
+          })
+      }
     }else{
       const personObject = {
         name: newName,
-        number: newNumber,
-        id: persons.length+1
+        number: newNumber
       }
       personService
         .create(personObject)
         .then(response =>{
           setPersons(persons.concat(response.data))
           setNewName('')
+          setNumber('')
         })
     }
   }
