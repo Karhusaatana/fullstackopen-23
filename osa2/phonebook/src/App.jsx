@@ -5,7 +5,7 @@ const Persons = (props) =>{
   return(
       <ul>
         {props.persons.map(person => 
-          <li key={person.id}>{person.name} {person.number}</li>
+          <li key={person.id}>{person.name} {person.number} <button type="button" onClick={() => props.deleteClick(person.id, person.name)}>delete</button></li>
         )}
       </ul>
   )
@@ -52,7 +52,7 @@ const App = () => {
     const list = persons.map((person) => person.name)
     if(list.includes(newName))
     {
-      alert(`${newName} is already added to phonebook`);
+      alert(`${newName} is already added to phonebook`)
     }else{
       const personObject = {
         name: newName,
@@ -80,6 +80,19 @@ const App = () => {
     event.preventDefault()
     setFilter(event.target.value)
   }
+  const handleDeleteClick = (id, name) =>{
+    if(window.confirm(`Delete ${name}`)){
+      personService
+        .remove(id)
+        .then(setPersons(persons.filter(p => p.id !== id)))
+        .catch(error =>{
+          alert(
+            `the person '${name}' was already deleted from server`
+          )
+          setPersons(persons.filter(p => p.id !== id))
+        })
+    }
+  }
 
   const personToShow = !showAll
     ? persons
@@ -93,7 +106,7 @@ const App = () => {
       
       <h3>add a new</h3>
 
-      <PersonForm 
+      <PersonForm
         submit={addPerson} 
         name={newName} 
         nameChange={handleNameChange} 
@@ -103,7 +116,7 @@ const App = () => {
       
       <h2>Numbers</h2>
 
-      <Persons persons={personToShow}/>
+      <Persons persons={personToShow} deleteClick={handleDeleteClick}/>
     </div>
   )
 }
