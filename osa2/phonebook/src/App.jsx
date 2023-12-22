@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import axios from 'axios'
+import { useState, useEffect } from 'react'
 
 
 const Persons = (props) =>{
@@ -33,17 +34,20 @@ const PersonForm = (props) =>{
   )
 }
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ]) 
+  const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNumber] = useState('')
   const [newFilter, setFilter] = useState('')
   const [showAll, setShowAll] = useState(true)
 
+  useEffect(() =>{
+    const eventHandler = response =>{
+      setPersons(response.data)
+    }
+
+    const promise = axios.get('http://localhost:3001/persons')
+    promise.then(eventHandler)
+  }, [])
   const addPerson = (event) =>{
     event.preventDefault()
     const list = persons.map((person) => person.name)
@@ -56,11 +60,16 @@ const App = () => {
         number: newNumber,
         id: persons.length+1
       }
-      setPersons(persons.concat(personObject))
-      setNewName('')
-      setNumber('')
+      axios
+      .post('http://localhost:3001/persons', personObject)
+      .then(response =>{
+        setPersons(persons.concat(personObject))
+        setNewName('')
+        setNumber('')
+      })
     }
   }
+  
   const handleNameChange = (event) =>{
     event.preventDefault()
     setNewName(event.target.value)
