@@ -2,23 +2,13 @@
   "persons": [
     {
       "name": "Otso",
-      "number": "3",
+      "number": "2323",
       "id": 1
     },
     {
-      "name": "Arto",
-      "number": "34324",
+      "name": "Monkey",
+      "number": "2323",
       "id": 2
-    },
-    {
-      "name": "Ada Lovelace",
-      "number": "112-43434",
-      "id": 3
-    },
-    {
-      "name": "Salla",
-      "number": "23123-4334",
-      "id": 4
     }
   ]
 }

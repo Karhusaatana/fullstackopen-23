@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
+import './App.css'
 
 const Persons = (props) =>{
   return(
@@ -32,12 +33,36 @@ const PersonForm = (props) =>{
       </form>
   )
 }
+const ErrorNotification = ({ message }) => {
+  if (message === null) {
+    return null
+  }
+
+  return (
+    <div className='error'>
+      {message}
+    </div>
+  )
+}
+const AddNotification = ({ message }) => {
+  if (message === null) {
+    return null
+  }
+
+  return (
+    <div className='add'>
+      {message}
+    </div>
+  )
+}
 const App = () => {
   const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNumber] = useState('')
   const [newFilter, setFilter] = useState('')
   const [showAll, setShowAll] = useState(true)
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [addMessage, setAddMessage] = useState(null)
 
   useEffect(() =>{
     personService
@@ -63,11 +88,12 @@ const App = () => {
             setNewName('')
             setNumber('')
           })
-          .catch(error =>{
-            alert(
-              `the number of '${newName}' can't be replaced`
-            )
-          })
+          setAddMessage(
+            `Edited ${changedPerson.name}`
+          )
+          setTimeout(() => {
+            setAddMessage(null)
+          }, 3000)
       }
     }else{
       const personObject = {
@@ -81,6 +107,12 @@ const App = () => {
           setNewName('')
           setNumber('')
         })
+        setAddMessage(
+          `Added ${personObject.name}`
+        )
+        setTimeout(() => {
+          setAddMessage(null)
+        }, 3000)
     }
   }
   
@@ -102,9 +134,12 @@ const App = () => {
         .remove(id)
         .then(setPersons(persons.filter(p => p.id !== id)))
         .catch(error =>{
-          alert(
-            `the person '${name}' was already deleted from server`
-          )
+            setErrorMessage(
+              `Person '${name}' is already removed from server`
+            )
+            setTimeout(() => {
+              setErrorMessage(null)
+            }, 3000)
           setPersons(persons.filter(p => p.id !== id))
         })
     }
@@ -117,6 +152,9 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+
+      <AddNotification message={addMessage}/>
+      <ErrorNotification message={errorMessage}/>
 
       <Filter value={newFilter} onChange={handleFilterChange}/>
       
