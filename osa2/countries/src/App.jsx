@@ -1,6 +1,8 @@
 import { useState, useEffect} from 'react'
 import axios from 'axios'
 
+const api_key = import.meta.env.VITE_SOME_KEY
+
 const CountriesForm = (props) =>{
   return(
     <div>
@@ -32,8 +34,23 @@ const FilterCountries = (props) =>{
       <div>Too many matches, specify another filter</div>
     )
   }else if (props.countries.length == 1){
+
+    const [temperature, setTemperature] = useState('')
+    const [wind, setWind] = useState('')
+    const [icon, setIcon] = useState('10d')
+    const [weather, setWeather] = useState('')
+
     const countryData = props.countries[0]
-    console.log(countryData.name.common)
+    
+    axios
+      .get(`https://api.openweathermap.org/data/2.5/weather?q=${countryData.capital}&APPID=${api_key}`)
+      .then(response => {
+        setTemperature(response.data.main.temp)
+        setWind(response.data.wind.speed)
+        setIcon(response.data.weather[0].icon)
+        setWeather(response.data.weather[0].description)
+    })
+
     return(
       <div>
         <h2>{countryData.name.common}</h2>
@@ -46,6 +63,10 @@ const FilterCountries = (props) =>{
           )}
         </ul>
         <img src={countryData.flags.png} alt={countryData.flags.alt} />
+        <h3>Weather in {countryData.capital}</h3>
+        <p>temperature {(temperature -273.15).toFixed(2)} Celcius</p>
+        <img src={`https://openweathermap.org/img/wn/${icon}@2x.png`} alt={weather} />
+        <p>wind {wind} m/s</p>
       </div>
     )
   }else{
@@ -62,17 +83,14 @@ function App() {
   const [showAll, setShowAll] = useState(true)
 
   useEffect(() => {
-      console.log('fetching countries data...')
       axios
         .get(`https://studies.cs.helsinki.fi/restcountries/api/all`)
         .then(response => {
-          console.log(response.data)
           setCountriesData(response.data)
         })
   }, [])
   const handleFilterChange = (event) =>{
     event.preventDefault()
-    console.log(event.target.value)
     setFilter(event.target.value)
   }
   const handleCountryToShowClick = (name) =>{
