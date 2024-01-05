@@ -13,7 +13,7 @@ const CountriesForm = (props) =>{
 const Country = (props) =>{
   return(
     <div>
-      {props.name}
+      {props.name} <button type="button" onClick={() => props.onclick(props.name)}>show</button>
     </div>
   )
 }
@@ -21,7 +21,7 @@ const ShowCountries = (props) =>{
   return(
     <div>
       {props.countries.map(country =>
-        <Country key={country.name.common} name={country.name.common} />
+        <Country key={country.name.common} name={country.name.common} onclick={props.onclick}/>
       )}
     </div>
   )
@@ -51,7 +51,7 @@ const FilterCountries = (props) =>{
   }else{
     return(
       <div>
-        <ShowCountries countries={props.countries}/>
+        <ShowCountries countries={props.countries} onclick={props.onclick}/>
       </div>
     )
   }
@@ -75,6 +75,9 @@ function App() {
     console.log(event.target.value)
     setFilter(event.target.value)
   }
+  const handleCountryToShowClick = (name) =>{
+    setFilter(name)
+  }
   const countriesToShow = !showAll
     ? countries
     : countries.filter(country => country.name.common.toLowerCase().includes(filter.toLowerCase()))
@@ -82,7 +85,7 @@ function App() {
   return (
     <div>
       <CountriesForm onchange={handleFilterChange}/>
-      <FilterCountries countries={countriesToShow}/>
+      <FilterCountries countries={countriesToShow} onclick={handleCountryToShowClick}/>
     </div>
   )
 }
