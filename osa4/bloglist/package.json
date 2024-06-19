@@ -17,6 +17,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "lodash": "^4.17.21",
+    "lodash-contrib": "^4.1200.1",
     "mongoose": "^8.4.3"
   }
 }
