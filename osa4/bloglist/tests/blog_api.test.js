@@ -32,7 +32,6 @@ beforeEach(async () =>{
 
 test('there are two blogs', async () => {
   const response = await api.get('/api/blogs')
-
   assert.strictEqual(response.body.length, initialBlogs.length)
 })
 
@@ -41,6 +40,15 @@ test('blogs are returned as json', async () => {
     .get('/api/blogs')
     .expect(200)
     .expect('Content-Type', /application\/json/)
+})
+
+test('blogs identifier is id not _id', async () => {
+  const response = await api.get('/api/blogs')
+  const blogs = response.body
+  blogs.forEach(blog =>{
+    assert('id' in blog)
+    assert(!('_id' in blog))
+  })
 })
 
 after(async () => {
