@@ -51,6 +51,24 @@ test('blogs identifier is id not _id', async () => {
   })
 })
 
+test('post creates a new blog post', async () => {
+  const newPost = {
+    title: 'News',
+    author: 'Anchor',
+    url: 'https://newsanchor',
+    likes: 100
+  }
+  await api
+    .post('/api/blogs')
+    .send(newPost)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const response = await api.get('/api/blogs')
+  
+  assert.strictEqual(response.body.length, initialBlogs.length + 1)
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
