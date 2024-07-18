@@ -69,6 +69,26 @@ test('post creates a new blog post', async () => {
   assert.strictEqual(response.body.length, initialBlogs.length + 1)
 })
 
+test('missing likes property in post defaults to 0', async () => {
+  const newPost = {
+    title: 'Magic',
+    author: 'Mike',
+    url: 'https://magicmike'
+  }
+  await api
+    .post('/api/blogs')
+    .send(newPost)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const response = await api.get('/api/blogs')
+
+  const likes = response.body[initialBlogs.length].likes
+  
+  assert.strictEqual(likes, 0)
+})
+
+
 after(async () => {
   await mongoose.connection.close()
 })
