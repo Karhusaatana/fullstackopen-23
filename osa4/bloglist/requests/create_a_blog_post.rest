@@ -1,10 +1,10 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjY2OThlYzJiYjA5YTQ2YzM5NjkzYjk5ZSIsImlhdCI6MTcyMjMzODQ2NH0.oTLDtPRWQx-g8tXTtI7FRrVQ8u9Lad-5PZgpA5PoS0I
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjY2OThlYzJiYjA5YTQ2YzM5NjkzYjk5ZSIsImlhdCI6MTcyMjM0Mjk1MSwiZXhwIjoxNzIyMzQ2NTUxfQ.SlUfQp1D0oFvZK5che_FA5bU1P5W4ukn_ih-mnV_95Y
 
 {
-  "title": "monke",
-  "author": "yes",
-  "url": "monke.com",
-  "likes": 5
+  "title": "test",
+  "author": "test",
+  "url": "test.com",
+  "likes": 4
 }
