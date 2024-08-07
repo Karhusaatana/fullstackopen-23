@@ -11,15 +11,20 @@ blogsRouter.get('/', async (request, response) => {
 
 blogsRouter.put('/:id', async (request, response) => {
   const body = request.body
+  const blog = await Blog.findById(request.params.id)
 
-  const blog = {
+  if (!blog) {
+    response.status(404).end()
+  }
+  const updatedBlog = {
     url: body.url,
     title: body.title,
     author: body.author,
+    user: blog.user,
     likes: body.likes || 0
   }
-  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
-  response.status(201).json(updatedBlog)
+  const savedBlog = await Blog.findByIdAndUpdate(request.params.id, updatedBlog, { new: true })
+  response.status(201).json(savedBlog)
 })
 
 blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
