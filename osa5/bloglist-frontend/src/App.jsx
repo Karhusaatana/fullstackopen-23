@@ -144,6 +144,8 @@ const App = () => {
     )
   }
 
+  const sortedBlogs = blogs.sort((a,b) => b.likes - a.likes)
+
   if(user === null){
     return(
       <div>
@@ -161,7 +163,7 @@ const App = () => {
       <AddNotification message={addMessage} />
       <p>{user.name} logged-in <button onClick={handleLogout}>logout</button></p>
       {blogForm()}
-      {blogs.map(blog =>
+      {sortedBlogs.map(blog =>
         <Blog key={blog.id} blog={blog} user={user}/>
       )}
     </div>
