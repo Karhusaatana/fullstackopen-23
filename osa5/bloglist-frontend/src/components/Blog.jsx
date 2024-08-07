@@ -2,12 +2,16 @@ import { useState, useEffect } from "react"
 import blogService from '../services/blogs'
 import userService from '../services/users'
 
-const Blog = ({ blog, user }) => {
+const Blog = ({ blog, user, handleDeleteBlog }) => {
   const [visible, setVisible] = useState(false)
   const [likes, setLikes] = useState(blog.likes)
   const [userId, setUserId] = useState(null)
-
+  const [blogOwner, setBlogOwner] = useState(null)
+  
   useEffect(() => {
+    if(blog.user){
+      setBlogOwner(blog.user.name)
+    }
     userService
         .getAll()
         .then(users => setUserId(users.filter(u => u.username !== user.username)[0].id))
@@ -41,6 +45,18 @@ const Blog = ({ blog, user }) => {
     }
   }
   
+  const deleteBlog = () => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
+      try {
+          blogService
+            .removeById(blog.id)
+            .then(handleDeleteBlog(blog.id))
+      } catch (exception) {
+        console.log(exception);
+      }
+    }
+  }
+  
   if(!visible){
     return(
       <div style={blogStyle}>
@@ -53,7 +69,8 @@ const Blog = ({ blog, user }) => {
         {blog.title} {blog.author} <button onClick={toggleVisibility}>hide</button>
         <div>{blog.url}</div>
         <div>likes {likes} <button onClick={addLike}>like</button></div>
-        <div>{user.name}</div>
+        <div>{blogOwner}</div>
+        {blogOwner === user.name && <button onClick={deleteBlog}>remove</button>}
       </div>  
     )
   }
