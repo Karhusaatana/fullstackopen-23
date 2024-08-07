@@ -20,11 +20,12 @@ const App = () => {
   const [Title, setTitle] = useState('')
   const [Author, setAuthor] = useState('')
   const [URL, setURL] = useState('')
+  const [userId, setUserId] = useState(null)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
-    )  
+    )
   }, [])
 
   useEffect(() => {
@@ -35,6 +36,7 @@ const App = () => {
       blogService.setToken(user.token)
     }
   }, [])
+
 
   const ErrorNotification = ({ message }) => {
     if (message === null) {
@@ -160,7 +162,7 @@ const App = () => {
       <p>{user.name} logged-in <button onClick={handleLogout}>logout</button></p>
       {blogForm()}
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} user={user}/>
       )}
     </div>
     
