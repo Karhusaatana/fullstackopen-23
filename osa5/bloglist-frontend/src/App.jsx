@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
@@ -12,8 +12,8 @@ const App = () => {
   const [loginVisible, setLoginVisible] = useState(false)
   const [blogFormVisible, setBlogFormVisible] = useState(false)
   const [blogs, setBlogs] = useState([])
-  const [username, setUsername] = useState('') 
-  const [password, setPassword] = useState('') 
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState(null)
   const [addMessage, setAddMessage] = useState(null)
   const [user, setUser] = useState(null)
@@ -21,6 +21,7 @@ const App = () => {
   const [Author, setAuthor] = useState('')
   const [URL, setURL] = useState('')
   const [userId, setUserId] = useState(null)
+  const noteFormRef = useRef()
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -61,7 +62,6 @@ const App = () => {
   }
 
   const handleLogin = async (event) => {
-    console.log("logging")
     event.preventDefault()
     try {
       const user = await loginService.login({
@@ -97,16 +97,17 @@ const App = () => {
   }
 
   const addBlog = (blogObject) => {
+    noteFormRef.current.toggleVisibility()
     try{
       blogService
-      .create(blogObject)
-      .then(returnedBlog => {
-        setBlogs(blogs.concat(returnedBlog))
-        setAddMessage('add new blog')
-        setTimeout(() => {
-          setAddMessage(null)
-        }, 5000)
-      })
+        .create(blogObject)
+        .then(returnedBlog => {
+          setBlogs(blogs.concat(returnedBlog))
+          setAddMessage('add new blog')
+          setTimeout(() => {
+            setAddMessage(null)
+          }, 5000)
+        })
     }catch (exception) {
       setErrorMessage('Wrong credentials')
       setTimeout(() => {
@@ -116,7 +117,7 @@ const App = () => {
   }
 
   const blogForm = () => (
-    <Togglable buttonLabel='new blog'>
+    <Togglable buttonLabel='new blog' ref={noteFormRef}>
       <BlogForm createBlog={addBlog} />
     </Togglable>
   )
@@ -148,7 +149,7 @@ const App = () => {
 
   const handleDeleteBlog = (id) => {
     setBlogs(blogs.filter(blog => blog.id !== id))
-  } 
+  }
 
   if(user === null){
     return(
@@ -171,7 +172,6 @@ const App = () => {
         <Blog key={blog.id} blog={blog} user={user} handleDeleteBlog={handleDeleteBlog}/>
       )}
     </div>
-    
   )
 }
 
