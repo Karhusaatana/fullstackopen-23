@@ -53,19 +53,23 @@ const Blog = ({ blog, user, handleDeleteBlog }) => {
   }
   if(!visible){
     return(
-      <div style={blogStyle}>
-        {blog.title} {blog.author} <button onClick={toggleVisibility}>view</button>
-      </div>
+      <li className='blog'>
+        <div style={blogStyle}>
+          {blog.title} {blog.author} <button onClick={toggleVisibility}>view</button>
+        </div>
+      </li>
     )
   } else {
     return (
-      <div style={blogStyle}>
-        {blog.title} {blog.author} <button onClick={toggleVisibility}>hide</button>
-        <div>{blog.url}</div>
-        <div>likes {likes} <button onClick={addLike}>like</button></div>
-        <div>{blogOwner}</div>
-        {blogOwner === user.name && <button onClick={deleteBlog}>remove</button>}
-      </div>
+      <li className='blog'>
+        <div style={blogStyle}>
+          {blog.title} {blog.author} <button onClick={toggleVisibility}>hide</button>
+          <div>{blog.url}</div>
+          <div>likes {likes} <button onClick={addLike}>like</button></div>
+          <div>{blogOwner}</div>
+          {blogOwner === user.name && <button onClick={deleteBlog}>remove</button>}
+        </div>
+      </li>
     )
   }
 }
