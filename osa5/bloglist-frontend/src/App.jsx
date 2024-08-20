@@ -21,12 +21,14 @@ const App = () => {
   const [Author, setAuthor] = useState('')
   const [URL, setURL] = useState('')
   const [userId, setUserId] = useState(null)
-  const noteFormRef = useRef()
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )
+    blogService
+      .getAll()
+      .then(blogs => {
+        setBlogs(blogs)
+      }
+      )
   }, [])
 
   useEffect(() => {
@@ -38,6 +40,27 @@ const App = () => {
     }
   }, [])
 
+  const blogFormRef = useRef()
+
+  const handleLike = id => {
+    console.log('handling like')
+    const blog = blogs.find(b => b.id === id)
+    const changedBlog = { ...blog, likes: (blog.likes + 1) }
+
+    blogService
+      .update(id, changedBlog)
+      .then(returnedBlog => {
+        setBlogs(blogs.map(blog => blog.id !== id ? blog : returnedBlog))
+      })
+      .catch(error => {
+        setErrorMessage(
+          `Blog '${blog.content}' was already removed from server`
+        )
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      })
+  }
 
   const ErrorNotification = ({ message }) => {
     if (message === null) {
@@ -97,27 +120,16 @@ const App = () => {
   }
 
   const addBlog = (blogObject) => {
-    noteFormRef.current.toggleVisibility()
-    try{
-      blogService
-        .create(blogObject)
-        .then(returnedBlog => {
-          setBlogs(blogs.concat(returnedBlog))
-          setAddMessage('add new blog')
-          setTimeout(() => {
-            setAddMessage(null)
-          }, 5000)
-        })
-    }catch (exception) {
-      setErrorMessage('Wrong credentials')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
-    }
+    blogFormRef.current.toggleVisibility()
+    blogService
+      .create(blogObject)
+      .then(returnedBlog => {
+        setBlogs(blogs.concat(returnedBlog))
+      })
   }
 
   const blogForm = () => (
-    <Togglable buttonLabel='new blog' ref={noteFormRef}>
+    <Togglable buttonLabel='new blog' ref={blogFormRef}>
       <BlogForm createBlog={addBlog} />
     </Togglable>
   )
@@ -148,7 +160,9 @@ const App = () => {
   const sortedBlogs = blogs.sort((a,b) => b.likes - a.likes)
 
   const handleDeleteBlog = (id) => {
-    setBlogs(blogs.filter(blog => blog.id !== id))
+    if (window.confirm('Remove blog?')) {
+      setBlogs(blogs.filter(blog => blog.id !== id))
+    }
   }
 
   if(user === null){
@@ -169,7 +183,13 @@ const App = () => {
       <p>{user.name} logged-in <button onClick={handleLogout}>logout</button></p>
       {blogForm()}
       {sortedBlogs.map(blog =>
-        <Blog key={blog.id} blog={blog} user={user} handleDeleteBlog={handleDeleteBlog}/>
+        <Blog
+          key={blog.id}
+          blog={blog}
+          user={user}
+          handleDeleteBlog={handleDeleteBlog}
+          handleLike={() => handleLike(blog.id)}
+        />
       )}
     </div>
   )

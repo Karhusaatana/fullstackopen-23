@@ -1,20 +1,35 @@
 import { useState, useEffect } from 'react'
 import blogService from '../services/blogs'
 import userService from '../services/users'
+import axios from 'axios'
 
-const Blog = ({ blog, user, handleDeleteBlog }) => {
-  const [visible, setVisible] = useState(false)
-  const [likes, setLikes] = useState(blog.likes)
-  const [userId, setUserId] = useState(null)
-  const [blogOwner, setBlogOwner] = useState(null)
+const Blog = ({ blog, user, handleDeleteBlog, handleLike }) => {
+  const [state, setState] = useState({
+    visible: false,
+    userId: null,
+    blogOwner: blog.user ? blog.user.name : null,
+  })
+
   useEffect(() => {
-    if(blog.user){
-      setBlogOwner(blog.user.name)
+    const fetchUserId = async () => {
+      try {
+        const users = await userService.getAll()
+        const filteredUser = users.find(u => u.username !== user.username)
+        if (filteredUser) {
+          setState(prevState => ({ ...prevState, userId: filteredUser.id }))
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          console.error('Network error: Please check your connection.')
+        } else {
+          console.error('An unexpected error occurred.')
+        }
+      }
     }
-    userService
-      .getAll()
-      .then(users => setUserId(users.filter(u => u.username !== user.username)[0].id))
-  }, [blog.user, user.username])
+
+    fetchUserId()
+  }, [user.username])
+
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -22,56 +37,39 @@ const Blog = ({ blog, user, handleDeleteBlog }) => {
     borderWidth: 1,
     marginBottom: 5
   }
+
   const toggleVisibility = () => {
-    setVisible(!visible)
+    setState(prevState => ({ ...prevState, visible: !prevState.visible }))
   }
-  const addLike = async () => {
-    try{
-      blogService
-        .update(blog.id, {
-          user: userId,
-          likes: likes + 1,
-          author: blog.author,
-          title: blog.title,
-          url: blog.url
-        })
-        .then(response => setLikes(response.likes))
-    }catch (exception) {
-      console.log(exception)
-    }
-  }
-  const deleteBlog = () => {
-    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}?`)) {
-      try {
-        blogService
-          .removeById(blog.id)
-          .then(handleDeleteBlog(blog.id))
-      } catch (exception) {
-        console.log(exception)
-      }
-    }
-  }
-  if(!visible){
-    return(
-      <li className='blog'>
-        <div style={blogStyle}>
-          {blog.title} {blog.author} <button onClick={toggleVisibility}>view</button>
+
+  return (
+    <div style={blogStyle}>
+      <div>
+        {blog.title} {blog.author}
+        <button onClick={toggleVisibility}>
+          {state.visible ? 'hide' : 'view'}
+        </button>
+      </div>
+      {state.visible && (
+        <div>
+          <p>{blog.url}</p>
+          <p>
+            {blog.likes} likes
+            <button onClick={handleLike}>
+              like
+            </button>
+          </p>
+          <p>added by {state.blogOwner}</p>
+          {user.username === blog.user.username && (
+            <button
+              onClick={() => handleDeleteBlog(blog.id)}>
+                remove
+            </button>
+          )}
         </div>
-      </li>
-    )
-  } else {
-    return (
-      <li className='blog'>
-        <div style={blogStyle}>
-          {blog.title} {blog.author} <button onClick={toggleVisibility}>hide</button>
-          <div>{blog.url}</div>
-          <div>likes {likes} <button onClick={addLike}>like</button></div>
-          <div>{blogOwner}</div>
-          {blogOwner === user.name && <button onClick={deleteBlog}>remove</button>}
-        </div>
-      </li>
-    )
-  }
+      )}
+    </div>
+  )
 }
 
 export default Blog
