@@ -10,17 +10,12 @@ import './App.css'
 
 const App = () => {
   const [loginVisible, setLoginVisible] = useState(false)
-  const [blogFormVisible, setBlogFormVisible] = useState(false)
   const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState(null)
   const [addMessage, setAddMessage] = useState(null)
   const [user, setUser] = useState(null)
-  const [Title, setTitle] = useState('')
-  const [Author, setAuthor] = useState('')
-  const [URL, setURL] = useState('')
-  const [userId, setUserId] = useState(null)
 
   useEffect(() => {
     blogService

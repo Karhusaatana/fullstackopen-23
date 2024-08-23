@@ -4,10 +4,13 @@ const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
 const api = supertest(app)
-
+const { login } = require('../controllers/login')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 const helper = require('./test_helper')
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 describe('when there is initially some blogs saved', () => {
   beforeEach(async () => {
@@ -78,6 +81,20 @@ describe('when there is initially some blogs saved', () => {
 
   describe('addition of a new blog post', () => {
 
+    let token
+
+  beforeEach(async () => {
+    let user = await helper.createUser({ username: 'testuser', password: 'password' })
+
+    const loginResponse = await api
+      .post('/api/login')
+      .send({ username: 'testuser', password: 'password' })
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    token = loginResponse.body.token
+  })
+
     test('succeeds with valid data', async () => {
       const newPost = {
         title: 'News',
@@ -85,8 +102,10 @@ describe('when there is initially some blogs saved', () => {
         url: 'https://newsanchor',
         likes: 100
       }
+      
       await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newPost)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -106,6 +125,7 @@ describe('when there is initially some blogs saved', () => {
       }
       await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newPost)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -125,6 +145,7 @@ describe('when there is initially some blogs saved', () => {
     
       await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newPost)
         .expect(400)
     
@@ -140,7 +161,8 @@ describe('when there is initially some blogs saved', () => {
       }
     
       await api
-      .post('/api/blogs')
+        .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newPost)
         .expect(400)
     
@@ -149,14 +171,38 @@ describe('when there is initially some blogs saved', () => {
     })
   })
 
-  describe('deletetion of a blog post', () => {
+  describe('deletion of a blog post', () => {
+    let token
+
+    beforeEach(async () => {
+      let user = await User.findOne({})
+
+      if (!user) {
+        const newUser = new User({
+          username: 'testuser',
+          passwordHash: await bcrypt.hash('password', 10)
+        })
+        user = await newUser.save()
+      }
+
+      const loginResponse = await api
+        .post('/api/login')
+        .send({ username: 'testuser', password: 'password' })
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
+      token = loginResponse.body.token
+    })
 
     test('succeeds with status code 204 if id is valid', async () =>{
       const blogsAtStart = await helper.blogsInDb()
       const blogToDelete = blogsAtStart[0]
 
+      console.log("token2: ", token)
+
       await api
         .delete(`/api/blogs/${blogToDelete.id}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(204)
 
       const blogsAtEnd = await helper.blogsInDb()
@@ -168,12 +214,35 @@ describe('when there is initially some blogs saved', () => {
     })
   })
   describe('updating blog post', () =>{
+    let token
+
+    beforeEach(async () => {
+      let user = await User.findOne({})
+
+      if (!user) {
+        const newUser = new User({
+          username: 'testuser',
+          passwordHash: await bcrypt.hash('password', 10)
+        })
+        user = await newUser.save()
+      }
+
+      const loginResponse = await api
+        .post('/api/login')
+        .send({ username: 'testuser', password: 'password' })
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
+      token = loginResponse.body.token
+    })
+
     test('succeeds with status code 201 if id is valid', async () => {
       const blogsAtStart = await helper.blogsInDb()
       const blogToUpdate = blogsAtStart[0]
     
       await api
         .put(`/api/blogs/${blogToUpdate.id}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(201)
     
       const blogsAtEnd = await helper.blogsInDb()
