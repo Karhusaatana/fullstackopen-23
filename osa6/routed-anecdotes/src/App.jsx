@@ -1,34 +1,59 @@
 import { useState } from 'react'
-import {BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import {BrowserRouter as Router, Routes, Route, Link, useMatch } from 'react-router-dom'
 
 const Menu = ({ anecdotes }) => {
+
   const padding = {
     paddingRight: 5
   }
+
+  const match = useMatch('/anecdotes/:id')
+  const anecdote = match
+    ? anecdotes.find(anecdote => anecdote.id === Number(match.params.id))
+    : null
+  
   return (
-    <Router>
+    <div>
       <div>
         <Link to='/' style={padding}>anecdotes</Link>
-        <Link to='/createnew' style={padding}>create new</Link>
+        <Link to='/create' style={padding}>create new</Link>
         <Link to='/about' style={padding}>about</Link>
       </div>
       <Routes>
         <Route path="/" element={<AnecdoteList anecdotes={anecdotes} />} />
-        <Route path="/createnew" element={<CreateNew />} />
+        <Route path="/anecdotes/:id" element={<Anecdote anecdote={anecdote} />} />
+        <Route path="/create" element={<CreateNew />} />
         <Route path="/about" element={<About />} />
       </Routes>
-    </Router>
+    </div>
   )
 }
 
-const AnecdoteList = ({ anecdotes }) => (
-  <div>
-    <h2>Anecdotes</h2>
-    <ul>
-      {anecdotes.map(anecdote => <li key={anecdote.id} >{anecdote.content}</li>)}
-    </ul>
-  </div>
-)
+
+const AnecdoteList = ({ anecdotes }) => {
+  return (
+    <div>
+      <h2>Anecdotes</h2>
+      <ul>
+        {anecdotes.map(anecdote => 
+          <li key={anecdote.id} >
+            <Link to={`/anecdotes/${anecdote.id}`}>{anecdote.content}</Link>
+          </li>
+        )}
+      </ul>
+    </div>
+  )
+}
+
+const Anecdote = ({ anecdote }) => {
+  return ( 
+    <div>
+      <h2>{anecdote.content}</h2>
+      <p>has {anecdote.votes} votes</p>
+      <p>for more info see <a href={anecdote.info}>{anecdote.info}</a></p>
+    </div>
+  )
+}
 
 const About = () => (
   <div>
@@ -129,7 +154,7 @@ const App = () => {
 
     setAnecdotes(anecdotes.map(a => a.id === id ? voted : a))
   }
-
+  
   return (
     <div>
       <h1>Software anecdotes</h1>
